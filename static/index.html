@@ -19,15 +19,17 @@
     <title>Document</title>
 </head>
 <body class="uk-container-expand">
-    <nav class="uk-navbar-container uk-margin uk-flex">
-        <div class="uk-navbar-left">
-            <a class="uk-navbar-item uk-logo">Mermaid Go</a>
-        </div>
-        <div class="uk-navbar-right uk-margin-right">
-            <button class="uk-button uk-button-large" onclick="download()">Download</button>
-            <button class="uk-button uk-button-large" onclick="render()">Render</button>
-        </div>
-    </nav>
+    <div uk-sticky="sel-target: .uk-navbar-container; cls-active: uk-navbar-sticky">
+        <nav class="uk-navbar-container uk-margin uk-flex uk-flex-middle" uk-navbar="dropbar: true;">
+            <div class="uk-navbar-left">
+                <a class="uk-navbar-item uk-logo">Mermaid Go</a>
+            </div>
+            <div class="uk-navbar-right uk-margin-right uk-column-1-2">
+                <button class="uk-button uk-button-large" uk-toggle="target: #download-modal">Download</button>
+                <button class="uk-button uk-button-large" onclick="render()">Render</button>
+            </div>
+        </nav>
+    </div>
 
     <div>
         <div class="uk-flex uk-flex-between">
@@ -36,6 +38,20 @@
             </div>
             <div id="mermaid-output" class="mermaid uk-width uk-padding">
             </div>
+        </div>
+    </div>
+    <div id="download-modal" uk-modal>
+        <div class="uk-modal-dialog uk-modal-body">
+            <h2 class="uk-modal-title">Mermaid Graph Download</h2>
+            <p>ダウンロード形式を選択してください。</p>
+            <input type="radio" id="img-type-png" class="uk-radio" name="img-type" value="image/png" checked>
+            <label for="img-type-png">PNG形式</label>
+            <input type="radio" id="img-type-svg" class="uk-radio" name="img-type" value="image/svg+xml">
+            <label for="img-type-svg">SVG形式</label>
+            <p class="uk-text-right">
+                <button class="uk-button uk-button-default uk-modal-close" type="button">Cancel</button>
+                <button class="uk-button uk-button-primary" type="button" onclick="download()">Download</button>
+            </p>
         </div>
     </div>
     <script>
@@ -69,9 +85,9 @@
             const successFunc = function (b) {
                 const svg = document.createElement("img")
                 svg.src = b
+
                 let link = document.createElement('a');
-                link.download = 'hello.png';
-                // link.href = "data:image/png;base64," + b;
+                link.download = "graph.png"
                 link.href = b;
                 link.click();
                 URL.revokeObjectURL(link.href);
