@@ -1,7 +1,6 @@
 package web
 
 import (
-	"fmt"
 	"net/http"
 	"os"
 )
@@ -11,7 +10,6 @@ const (
 )
 
 func SetRouting(argsMap map[string]interface{}) {
-	fmt.Println("argsMap", argsMap)
 	http.HandleFunc("/", indexHandler(argsMap[Index]))
 
 	wd, err := os.Getwd()

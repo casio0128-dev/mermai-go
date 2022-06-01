@@ -34,7 +34,20 @@
 
     <div>
         <div class="uk-flex uk-flex-between">
-            <div class="input uk-width uk-padding">
+            <div class="uk-padding uk-padding-remove-bottom">Input</div>
+            <div class="uk-padding uk-padding-remove-top uk-padding-remove-bottom uk-flex uk-flex-row">
+                <div class="uk-flex uk-flex-column uk-padding-remove uk-margin-right">
+                    LivePreview
+                    <div id="is-live-preview" uk-switcher="animation: uk-animation-fade; toggle: > *">
+                        <button class="uk-button uk-button-default" type="button" onclick="livePreviewOn()">ON</button>
+                        <button class="uk-button uk-button-default" type="button" onclick="livePreviewOff()">OFF</button>
+                    </div>
+                </div>
+                <button class="uk-button uk-button-primary" type="button" onclick="copy()">SVG Copy</button>
+            </div>
+        </div>
+        <div class="uk-flex uk-flex-between">
+            <div class="input uk-width uk-padding uk-padding-remove-top">
                 <textarea id="mermaid-input" class="uk-input uk-textarea" style="height: 100vh;"></textarea>
             </div>
             <div id="mermaid-output" class="mermaid uk-width uk-padding">
@@ -43,9 +56,9 @@
     </div>
     <div id="download-modal" uk-modal>
         <div class="uk-modal-dialog uk-modal-body">
-            <h3 class="uk-modal-header">Mermaid Graph Download</h3>
+            <h3 class="uk-modal-header">グラフダウンロード</h3>
             <div class="uk-margin">
-                <h4>ダウンロード形式を選択してください。</h4>
+                <h4>ダウンロード形式</h4>
                 <div class="uk-flex uk-flex-row">
                     <div class="uk-column-1-2">
                         <input type="radio" id="img-type-png" class="uk-radio" name="img-type" value="image/png" checked>
@@ -57,9 +70,12 @@
                     </div>
                 </div>
             </div>
-            <div class="uk-margin">
-                <h4>ファイル名を入力してください。</h4>
-                <input type="text" id="img-file-name" class="uk-input" placeholder="graph.png">
+            <div class="uk-margin uk-flex uk-flex-column">
+                <h4>ファイル名</h4>
+                <div class="uk-inline">
+                    <a class="uk-form-icon" href="#" uk-icon="icon: pencil"></a>
+                    <input type="text" id="img-file-name" class="uk-input" placeholder="graph.png">
+                </div>
             </div>
             <p class="uk-text-right">
                 <button class="uk-button uk-button-default uk-modal-close" type="button">Cancel</button>
@@ -73,17 +89,25 @@
             type: "png",
             fileName: "graph"
         };
+        let isLivePreview = false;
 
         function init() {
             mermaid.initialize({ startOnLoad: true });
+            UIkit.switcher("#is-live-preview").show(1);
             setEventHandlers();
         }
 
         function setEventHandlers() {
+            const input = document.getElementById("mermaid-input");
             const downloadImgTypePNG = document.getElementById("img-type-png");
             const downloadImgTypeSVG = document.getElementById("img-type-svg");
             const downloadImgFilename = document.getElementById("img-file-name");
 
+            input.addEventListener("keyup", function (e) {
+                if (isLivePreview) {
+                    render();
+                }
+            })
             downloadImgTypePNG.addEventListener("change", function (e) {
                 downloadImgInfo.type = "png";
                 downloadImgFilename.placeholder = "graph.png";
@@ -115,6 +139,7 @@
         function render() {
             let input = document.getElementById("mermaid-input");
             let output = document.getElementById("mermaid-output");
+
             mermaid.render('theGraph', input.value, function(svgCode) {
                 output.innerHTML = svgCode;
             });
@@ -158,6 +183,18 @@
                 console.log("failed")
             }
             svg2imageData(document.querySelector("#mermaid-output svg"), successFunc, failedFunc)
+        }
+
+        function copy() {
+            const svgData = new XMLSerializer().serializeToString(document.querySelector("#mermaid-output svg"));
+            navigator.clipboard.writeText(svgData);
+        }
+
+        function livePreviewOn() {
+            isLivePreview = true;
+        }
+        function livePreviewOff() {
+            isLivePreview = false;
         }
     </script>
 </body>
