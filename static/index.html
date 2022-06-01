@@ -67,7 +67,17 @@
 
         function download() {
             const successFunc = function (b) {
-                console.log(b);
+                const svg = document.createElement("img")
+                svg.src = b
+                let link = document.createElement('a');
+                link.download = 'hello.png';
+                // link.href = "data:image/png;base64," + b;
+                link.href = b;
+                link.click();
+                URL.revokeObjectURL(link.href);
+
+                // var content_area = document.getElementById("mermaid-output");
+                // content_area.appendChild(svg);
             }
             const failedFunc = function (e) {
                 console.log("failed")
