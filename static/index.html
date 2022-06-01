@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="jp">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="./static/css/uikit.min.css">
+    <link rel="stylesheet" href="./static/css/uikit-rtl.min.css">
+
+    <!-- JavaScript -->
+    <script src="./static/js/jquery-3.6.0.min.js"></script>
+    <script src="./static/js/uikit.min.js"></script>
+    <script src="./static/js/uikit-icons.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+
+    <title>Document</title>
+</head>
+<body class="uk-container-expand">
+    <nav class="uk-navbar-container uk-margin uk-flex">
+        <div class="uk-navbar-left">
+            <a class="uk-navbar-item uk-logo">Mermaid Go</a>
+        </div>
+        <div class="uk-navbar-right uk-margin-right">
+            <button class="uk-button uk-button-large" onclick="download()">Download</button>
+            <button class="uk-button uk-button-large" onclick="render()">Render</button>
+        </div>
+    </nav>
+
+    <div>
+        <div class="uk-flex uk-flex-between">
+            <div class="input uk-width uk-padding">
+                <textarea id="mermaid-input" class="uk-input uk-textarea" style="height: 100vh;"></textarea>
+            </div>
+            <div id="mermaid-output" class="mermaid uk-width uk-padding">
+            </div>
+        </div>
+    </div>
+    <script>
+        mermaid.initialize({ startOnLoad: true });
+        function render() {
+            let input = document.getElementById("mermaid-input");
+            let output = document.getElementById("mermaid-output");
+            mermaid.render('theGraph', input.value, function(svgCode) {
+                output.innerHTML = svgCode;
+            });
+        }
+
+        function svg2imageData(svgElement, successCallback, errorCallback) {
+            var canvas = document.createElement('canvas');
+            canvas.width = svgElement.width.baseVal.value;
+            canvas.height = svgElement.height.baseVal.value;
+            var ctx = canvas.getContext('2d');
+            var image = new Image();
+            image.onload = () => {
+                ctx.drawImage(image, 0, 0, image.width, image.height);
+                successCallback(canvas.toDataURL());
+            };
+            image.onerror = (e) => {
+                errorCallback(e);
+            };
+            var svgData = new XMLSerializer().serializeToString(svgElement);
+            image.src = 'data:image/svg+xml;charset=utf-8;base64,' + btoa(svgData);
+        }
+
+        function download() {
+            const successFunc = function (b) {
+                console.log(b);
+            }
+            const failedFunc = function (e) {
+                console.log("failed")
+            }
+            svg2imageData(document.querySelector("#mermaid-output svg"), successFunc, failedFunc)
+        }
+    </script>
+</body>
+</html>
