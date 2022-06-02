@@ -12,6 +12,7 @@
     <script src="js/jquery-3.6.0.min.js"></script>
     <script src="js/uikit.min.js"></script>
     <script src="js/uikit-icons.min.js"></script>
+    <script src="js/index.js"></script>
 
     <!-- CSS -->
     <link rel="stylesheet" href="./static/css/uikit.min.css">
@@ -21,6 +22,7 @@
     <script src="./static/js/jquery-3.6.0.min.js"></script>
     <script src="./static/js/uikit.min.js"></script>
     <script src="./static/js/uikit-icons.min.js"></script>
+    <script src="./static/js/index.js"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
 
@@ -32,10 +34,11 @@
             <div class="uk-navbar-left">
                 <a class="uk-navbar-item uk-logo">Mermaid Go</a>
             </div>
-            <div class="uk-navbar-right uk-margin-right uk-column-1-2">
+            <div class="uk-navbar-right uk-margin-right uk-column-1-4">
                 <button class="uk-button uk-button-large uk-button-primary" uk-toggle="target: #download-modal">Download</button>
                 <button class="uk-button uk-button-large uk-button-primary" onclick="render()">Render</button>
-                <a href="https://mermaid-js.github.io/mermaid/#/flowchart" target="_blank" class="uk-button uk-button-large uk-button-secondary">Help</a>
+                <button class="uk-button uk-button-large uk-button-primary" onclick="save()">Save</button>
+                <a href="https://mermaid-js.github.io/mermaid/#/flowchart" target="_blank" class="uk-button uk-button-small uk-button-secondary">Help</a>
             </div>
         </nav>
     </div>
@@ -93,55 +96,26 @@
     </div>
     <script>
         init();
-        const downloadImgInfo = {
-            type: "png",
-            fileName: "graph"
-        };
-        let isLivePreview = false;
 
         function init() {
             mermaid.initialize({ startOnLoad: true });
-            UIkit.switcher("#is-live-preview").show(1);
+
+            if (localStorage.getItem("config") != null && JSON.stringify(localStorage.getItem("config")) !== JSON.stringify(config)) {
+                const loadConf = JSON.parse(localStorage.getItem("config"));
+                config.downloadImgInfo = loadConf.downloadImgInfo;
+                config.isLivePreview = loadConf.isLivePreview;
+            }
+            setIsLivePreview(config.isLivePreview);
+
             setEventHandlers();
         }
 
-        function setEventHandlers() {
-            const input = document.getElementById("mermaid-input");
-            const downloadImgTypePNG = document.getElementById("img-type-png");
-            const downloadImgTypeSVG = document.getElementById("img-type-svg");
-            const downloadImgFilename = document.getElementById("img-file-name");
-
-            input.addEventListener("keyup", function (e) {
-                if (isLivePreview) {
-                    render();
-                }
-            })
-            downloadImgTypePNG.addEventListener("change", function (e) {
-                downloadImgInfo.type = "png";
-                downloadImgFilename.placeholder = "graph.png";
-            });
-            downloadImgTypeSVG.addEventListener("change", function (e) {
-                downloadImgInfo.type = "svg";
-                downloadImgFilename.placeholder = "graph.svg";
-            });
-            downloadImgFilename.addEventListener("change", function (e) {
-                const filename = e.target.value.replaceAll(" ", "_");
-                if (filename == null) {
-                    downloadImgInfo.fileName = "graph";
-                } else {
-                    let name = "";
-                    switch (downloadImgInfo.type) {
-                        case "png":
-                            name = filename.split(".png")[0];
-                            break;
-                        case "svg":
-                            name = filename.split(".svg")[0];
-                            break;
-                        default:
-                    }
-                    downloadImgInfo.fileName = name;
-                }
-            });
+        function setIsLivePreview(on) {
+            if (on) {
+                UIkit.switcher("#is-live-preview").show(0);
+            } else {
+                UIkit.switcher("#is-live-preview").show(1);
+            }
         }
 
         function render() {
@@ -151,58 +125,6 @@
             mermaid.render('theGraph', input.value, function(svgCode) {
                 output.innerHTML = svgCode;
             });
-        }
-
-        function svg2imageData(svgElement, successCallback, errorCallback) {
-            const canvas = document.createElement('canvas');
-            canvas.width = svgElement.width.baseVal.value;
-            canvas.height = svgElement.height.baseVal.value;
-            const ctx = canvas.getContext('2d');
-            const image = new Image();
-            image.onload = () => {
-                ctx.drawImage(image, 0, 0, image.width, image.height);
-                successCallback(canvas.toDataURL());
-            };
-            image.onerror = (e) => {
-                errorCallback(e);
-            };
-            const svgData = new XMLSerializer().serializeToString(svgElement);
-            image.src = 'data:image/svg+xml;charset=utf-8;base64,' + btoa(svgData);
-        }
-
-        function download() {
-            const successFunc = function (b) {
-                const svg = document.createElement("img")
-                svg.src = b
-
-                let link = document.createElement('a');
-                if (downloadImgInfo.type === "svg") {
-                    link.download = downloadImgInfo.fileName + ".svg"
-                    const b64 = b.split("data:image/png;base64,")[1];
-                    link.href = 'data:image/svg+xml;charset=utf-8;base64,' + b64;
-                } else {
-                    link.download = downloadImgInfo.fileName + ".png"
-                    link.href = b;
-                }
-                link.click();
-                URL.revokeObjectURL(link.href);
-            }
-            const failedFunc = function (e) {
-                console.log("failed")
-            }
-            svg2imageData(document.querySelector("#mermaid-output svg"), successFunc, failedFunc)
-        }
-
-        function copy() {
-            const svgData = new XMLSerializer().serializeToString(document.querySelector("#mermaid-output svg"));
-            navigator.clipboard.writeText(svgData);
-        }
-
-        function livePreviewOn() {
-            isLivePreview = true;
-        }
-        function livePreviewOff() {
-            isLivePreview = false;
         }
     </script>
 </body>
