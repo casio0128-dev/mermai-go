@@ -75,8 +75,8 @@ function download() {
                 break;
             case "svg":
                 link.download = config.downloadImgInfo.fileName + ".svg"
-                const b64 = b.split("data:image/png;base64,")[1];
-                link.href = 'data:image/svg+xml;charset=utf-8;base64,' + b64;
+                const svgData = new XMLSerializer().serializeToString(document.querySelector("#mermaid-output svg"));
+                link.href = 'data:image/svg+xml;charset=utf-8;base64,' + btoa(svgData);
                 break;
         }
         link.click();
